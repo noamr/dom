@@ -6,25 +6,66 @@ an element in the DOM means removing and re-inserting it, a lot of its state get
 apparent effect of this is that when elements that contain iframes are moved around the DOM, the
 iframes themselves get reloaded.
 
-## The pain point
+This is currently a WhatWG state 1 proposal.
+
+### The pain point
 This is a pain point that have brought to existence pretty heavy library that try to mitigate it,
 e.g. [morphdom](https://github.com/patrick-steele-idem/morphdom) that tries its best to move elements
-"around" a stateful element to avoid removing it.
+"around" a stateful element to avoid removing it. Other libraries like [htmx](https://htmx.org/) have
+elaborate workarounds for this issue.
 
-## What state gets reset
+### What state gets reset
 We've identified a short list of features that represent state that gets reset when an element is
 removed and re-inserted:
 
-    1. IFrames get reloaded
-    1. A focused element loses its focus
-    1. Text selection is cleared
-    1. Fullscreen is existed
-    1. A popover is closed
-    1. A modal dialog ceases to be modal
-    1. CSS animations & transitions are reset
-    1. Pointer/touch events are cancelled
+  1. IFrames get reloaded
+  1. A focused element loses its focus
+  1. Text selection is cleared
+  1. Fullscreen is existed
+  1. A popover is closed
+  1. A modal dialog ceases to be modal
+  1. CSS animations & transitions are reset
+  1. Pointer/touch events are cancelled
 
+## The proposed solution
 
+### The API
+
+The proposed new API is a new DOM function: `Node.prototype.moveBefore`. It's a drop-in replacement for
+[`Node.prototype.insertBefore`](https://dom.spec.whatwg.org/#dom-node-insertbefore), and behaves in the 
+exact same way, except for the following:
+
+1. The element state defined above does not get reset. IFrames stay loaded, focused elements stay focused
+   (as long as they didn't move to an inert tree), CSS transitions continue or get triggered, etc.
+2. The author gets reflection of this in web components: a new optional `movedCallback`, which is invoked
+   instead of `disconnectedCallback` and `connectedCallback` when an element that has it declared is moved
+   in a state-preserving manner.
+3. New information in mutation observers (exact API shape TBD).
+
+See discussion at https://github.com/whatwg/dom/issues/1255.
+
+### Constraints
+
+To simplify the API, both the node and new container need to be [connected](https://dom.spec.whatwg.org/#connected), part of the same document, and also part of the
+same [node tree](https://dom.spec.whatwg.org/#concept-node-tree). The same-tree requirement can maybe be eased in the future.
+
+### A few specifics
+
+#### IFrames
+When an iframe is moved, it does not reload, and does not fire events.
+
+#### Focus
+When a focused element is moved, it generally stays focused. In the next [focus fixup](https://html.spec.whatwg.org/multipage/webappapis.html#event-loop-processing-model%3Afocusing-steps), it might lose focus and fire blur events, if for example it was moved into a hidden or inert subtree.
+
+## Considered alternatives
+
+### An iframe attribute
+
+e.g. a `preserve` attribute. this felt like the wrong layer to implement such a feature.
+
+### Changing the default behavior
+
+A bit risky in terms of subtle reliance on current behavior in existing websites.
 
 ## [Self-Review Questionnaire: Security and Privacy](https://w3ctag.github.io/security-questionnaire/)
 
