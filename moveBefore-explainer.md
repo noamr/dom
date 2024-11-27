@@ -73,6 +73,7 @@ This complicates the API a lot, and we haven't found a satisfactory solution tha
 
 This leaves us with [`insertBefore`](https://developer.mozilla.org/en-US/docs/Web/API/Node/insertBefore), [`appendChild`](https://developer.mozilla.org/en-US/docs/Web/API/Node/appendChild) and [`replaceChild`](https://developer.mozilla.org/en-US/docs/Web/API/Node/replaceChild).
 Those have been around for a long time, which brings a web-compatibility risk. In addition, applying a move semantic to 3 APIs and not to the rest would create confusing inconsistency in an API where consistency is key.
+Also, the next considered alternative is relevant to this design choice.
 
 ### Falling back to `insertBefore` when moving is not possible
 
