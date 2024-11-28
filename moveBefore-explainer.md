@@ -99,7 +99,7 @@ We could have convenience functions that move the node to the end, or remove a c
 
 ### A version that falls back to insertion
 
-A method like `moveOrInsertBefore` can be a drop-in replacement for `insertBefore` that moves when it can and insert when it can't.
+A method like `moveOrInsertBefore` can be a drop-in replacement for `insertBefore` that moves when it can and insert when it can't, specifically when moving from a disconnected tree to a connected tree.
 As mentioned before, we should tackle this later on, when we understand how useful `moveBefore` is as a drop-in replacement for `insertBefore`, vs. using it as a new primitive at a higher level.
 This should come after some time has passed, when the adoption of this API goes a bit beyond incorporating it into existing code that was originally tuned to a world where atomic moves were impossible.
 
